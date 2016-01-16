@@ -272,7 +272,9 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                 reactContext
                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                         .emit("onOpenAnnotation", event);
-                return false;
+        
+                // Returning true here hides the default popup, false shows it
+                return (marker == null || marker.getTitle() == null || marker.getTitle().length() == 0);
             }
         });
     }
