@@ -44,7 +44,8 @@ var MapMixins = {
     NativeModules.MapboxGLManager.getDirection(React.findNodeHandle(this.refs[mapRef]), callback);
   },
   mapStyles: NativeModules.MapboxGLManager.mapStyles,
-  userTrackingMode: NativeModules.MapboxGLManager.userTrackingMode
+  userTrackingMode: NativeModules.MapboxGLManager.userTrackingMode,
+  userLocationVerticalAlignment: NativeModules.MapboxGLManager.userLocationVerticalAlignment
 };
 
 var MapView = React.createClass({
@@ -128,7 +129,9 @@ var MapView = React.createClass({
     onFinishLoadingMap: React.PropTypes.func,
     onStartLoadingMap: React.PropTypes.func,
     onLocateUserFailed: React.PropTypes.func,
-    onLongPress: React.PropTypes.func
+    onLongPress: React.PropTypes.func,
+    contentInset: React.PropTypes.array,
+    userLocationVerticalAlignment: React.PropTypes.number
   },
   getDefaultProps() {
     return {

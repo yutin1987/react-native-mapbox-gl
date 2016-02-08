@@ -8,7 +8,7 @@
 
 #import "RCTMapboxGLManager.h"
 #import "RCTMapboxGL.h"
-#import "Mapbox.h"
+#import <Mapbox/Mapbox.h>
 #import "RCTConvert+CoreLocation.h"
 #import "RCTConvert+MapKit.h"
 #import "RCTBridge.h"
@@ -63,9 +63,13 @@ RCT_EXPORT_MODULE();
                      @"follow": [NSNumber numberWithUnsignedInt:MGLUserTrackingModeFollow],
                      @"followWithCourse": [NSNumber numberWithUnsignedInt:MGLUserTrackingModeFollowWithCourse],
                      @"followWithHeading": [NSNumber numberWithUnsignedInt:MGLUserTrackingModeFollowWithHeading]
+                     },
+             @"userLocationVerticalAlignment" : @{
+                     @"top": @(MGLAnnotationVerticalAlignmentTop),
+                     @"center": @(MGLAnnotationVerticalAlignmentCenter),
+                     @"bottom": @(MGLAnnotationVerticalAlignmentBottom)
                      }
              };
-
 };
 
 RCT_EXPORT_VIEW_PROPERTY(accessToken, NSString);
@@ -80,6 +84,7 @@ RCT_EXPORT_VIEW_PROPERTY(styleURL, NSURL);
 RCT_EXPORT_VIEW_PROPERTY(userTrackingMode, int);
 RCT_EXPORT_VIEW_PROPERTY(zoomEnabled, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(zoomLevel, double);
+RCT_EXPORT_VIEW_PROPERTY(userLocationVerticalAlignment, int);
 
 RCT_EXPORT_METHOD(getCenterCoordinateZoomLevel:(nonnull NSNumber *)reactTag
                   findEvents:(RCTResponseSenderBlock)callback)
@@ -131,6 +136,16 @@ RCT_CUSTOM_VIEW_PROPERTY(annotations, CLLocationCoordinate2D, RCTMapboxGL) {
 
         view.annotations = annotations;
     }
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(contentInset, UIEdgeInsetsMake, RCTMapboxGL)
+{
+    int top = [json[0] doubleValue];
+    int left = [json[3] doubleValue];
+    int bottom = [json[2] doubleValue];
+    int right = [json[1] doubleValue];
+    UIEdgeInsets inset = UIEdgeInsetsMake(top, left, bottom, right);
+    view.contentInset = inset;
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(attributionButtonIsHidden, BOOL, RCTMapboxGL)
@@ -462,9 +477,9 @@ NSObject *convertObjectToPolyline (NSObject *annotationObject)
             count++;
         }
     }
-
+    RCTMGLAnnotationPolyline *polyline = [RCTMGLAnnotationPolyline polylineAnnotation:coord strokeAlpha:strokeAlpha strokeColor:strokeColor strokeWidth:strokeWidth id:id type:@"polyline" count:count];
     free(coord);
-    return [RCTMGLAnnotationPolyline polylineAnnotation:coord strokeAlpha:strokeAlpha strokeColor:strokeColor strokeWidth:strokeWidth id:id type:@"polyline" count:count];
+    return polyline;
 }
 
 NSObject *convertObjectToPolygon (NSObject *annotationObject)
@@ -522,8 +537,8 @@ NSObject *convertObjectToPolygon (NSObject *annotationObject)
             count++;
         }
     }
-
+    RCTMGLAnnotationPolygon *polygon = [RCTMGLAnnotationPolygon polygonAnnotation:coord fillAlpha:fillAlpha fillColor:fillColor strokeColor:strokeColor strokeAlpha:strokeAlpha id:id type:@"polygon" count:count];
     free(coord);
-    return [RCTMGLAnnotationPolygon polygonAnnotation:coord fillAlpha:fillAlpha fillColor:fillColor strokeColor:strokeColor strokeAlpha:strokeAlpha id:id type:@"polygon" count:count];
+    return polygon;
 }
 @end
