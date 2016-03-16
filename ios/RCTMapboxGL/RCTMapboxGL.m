@@ -126,7 +126,7 @@ RCT_EXPORT_MODULE();
         if ([id length] != 0) {
             [_annotations setObject:annotation forKey:id];
         } else {
-            RCTLogError(@"field `id` is required on all annotation");
+            RCTLogError(@"field `id` is required on all annotations");
         }
         [_map addAnnotation:annotation];
     }
@@ -283,6 +283,11 @@ RCT_EXPORT_MODULE();
     [_map setCenterCoordinate:coordinates zoomLevel:zoomLevel animated:YES];
 }
 
+-(void)setCameraAnimated:(MGLMapCamera *)camera withDuration:(int)duration animationTimingFunction:(CAMediaTimingFunction *)function
+{
+    [_map setCamera:camera withDuration:duration animationTimingFunction:function];
+}
+
 - (void)setVisibleCoordinateBounds:(MGLCoordinateBounds)bounds edgePadding:(UIEdgeInsets)padding animated:(BOOL)animated
 {
     [_map setVisibleCoordinateBounds:bounds edgePadding:padding animated:animated];
@@ -350,11 +355,7 @@ RCT_EXPORT_MODULE();
 - (BOOL)mapView:(RCTMapboxGL *)mapView annotationCanShowCallout:(id <MGLAnnotation>)annotation {
     NSString *title = [(RCTMGLAnnotation *) annotation title];
     NSString *subtitle = [(RCTMGLAnnotation *) annotation subtitle];
-    if ([title length] != 0 || [subtitle length] != 0 ) {
-        return YES;
-    } else {
-        return NO;
-    }
+    return ([title length] != 0 || [subtitle length] != 0);
 }
 
 -(CLLocationCoordinate2D)centerCoordinate {
@@ -376,11 +377,8 @@ RCT_EXPORT_MODULE();
 
 - (void)removeAnnotation:(NSString*)selectedIdentifier
 {
-    NSUInteger keyCount = [_annotations count];
-    if (keyCount > 0) {
-        [_map removeAnnotation:[_annotations objectForKey:selectedIdentifier]];
-        [_annotations removeObjectForKey:selectedIdentifier];
-    }
+    [_map removeAnnotation:[_annotations objectForKey:selectedIdentifier]];
+    [_annotations removeObjectForKey:selectedIdentifier];
 }
 
 - (void) setContentInset:(UIEdgeInsets)inset
@@ -391,11 +389,8 @@ RCT_EXPORT_MODULE();
 
 - (void)removeAllAnnotations
 {
-    NSUInteger keyCount = [_annotations count];
-    if (keyCount > 0) {
-        [_map removeAnnotations:_map.annotations];
-        [_annotations removeAllObjects];
-    }
+    [_map removeAnnotations:_map.annotations];
+    [_annotations removeAllObjects];
 }
 
 - (UIButton *)mapView:(MGLMapView *)mapView rightCalloutAccessoryViewForAnnotation:(id <MGLAnnotation>)annotation;

@@ -47,6 +47,9 @@ var MapMixins = {
   getDirection(mapRef, callback) {;
     NativeModules.MapboxGLManager.getDirection(React.findNodeHandle(this.refs[mapRef]), callback);
   },
+  getBounds(mapRef, callback) {
+    NativeModules.MapboxGLManager.getBounds(React.findNodeHandle(this.refs[mapRef]), callback);
+  },
   mapStyles: NativeModules.MapboxGLManager.mapStyles,
   userTrackingMode: NativeModules.MapboxGLManager.userTrackingMode
 };
@@ -77,7 +80,7 @@ var ReactMapView = requireNativeComponent('RCTMapbox', {
       scrollEnabled: React.PropTypes.bool,
       showsUserLocation: React.PropTypes.bool,
       disableBackgroundUserLocation: React.PropTypes.bool,
-      styleUrl: React.PropTypes.string,
+      styleURL: React.PropTypes.string,
       userTrackingMode: React.PropTypes.number,
       zoomEnabled: React.PropTypes.bool,
       zoomLevel: React.PropTypes.number,
@@ -114,7 +117,7 @@ var ReactMapView = requireNativeComponent('RCTMapbox', {
         scrollEnabled: true,
         showsUserLocation: false,
         disableBackgroundUserLocation: false,
-        styleUrl: NativeModules.MapboxGLManager.mapStyles.streets,
+        styleURL: NativeModules.MapboxGLManager.mapStyles.streets,
         userTrackingMode: NativeModules.MapboxGLManager.userTrackingMode.none,
         zoomEnabled: true,
         zoomLevel: 0,

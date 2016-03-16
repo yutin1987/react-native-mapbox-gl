@@ -44,6 +44,7 @@ import android.graphics.drawable.BitmapDrawable;
 
 import android.graphics.drawable.BitmapDrawable;
 import javax.annotation.Nullable;
+import android.graphics.PointF;
 
 public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
@@ -62,7 +63,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public static final String PROP_SCROLL_ENABLED = "scrollEnabled";
     public static final String PROP_USER_LOCATION = "showsUserLocation";
     public static final String PROP_DISABLE_BACKGROUND_USER_LOCATION = "disableBackgroundUserLocation";
-    public static final String PROP_STYLE_URL = "styleUrl";
+    public static final String PROP_STYLE_URL = "styleURL";
     public static final String PROP_USER_TRACKING_MODE = "userTrackingMode";
     public static final String PROP_ZOOM_ENABLED = "zoomEnabled";
     public static final String PROP_ZOOM_LEVEL = "zoomLevel";
@@ -229,7 +230,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                 reactContext
                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                         .emit("onOpenAnnotation", event);
-        
+
                 // Returning true here hides the default popup, false shows it
                 return (marker == null || marker.getTitle() == null || marker.getTitle().length() == 0);
             }
@@ -243,8 +244,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
             public void onMapLongClick(@Nullable LatLng location) {
                 WritableMap event = Arguments.createMap();
                 WritableMap loc = Arguments.createMap();
-                loc.putDouble("latitude", view.getCenterCoordinate().getLatitude());
-                loc.putDouble("longitude", view.getCenterCoordinate().getLongitude());
+                loc.putDouble("latitude", location.getLatitude());
+                loc.putDouble("longitude", location.getLongitude());
                 event.putMap("src", loc);
                 ReactContext reactContext = (ReactContext) view.getContext();
                 reactContext
@@ -421,6 +422,21 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         callbackDict.putDouble("zoomLevel", center.zoom);
 
         return callbackDict;
+    }
+
+    public WritableMap getBounds(MapView view) {
+      WritableMap callbackDict = Arguments.createMap();
+      int viewportWidth = view.getWidth();
+      int viewportHeight = view.getHeight();
+      if (viewportWidth > 0 && viewportHeight > 0) {
+        LatLng ne = view.fromScreenLocation(new PointF(viewportWidth, 0));
+        LatLng sw = view.fromScreenLocation(new PointF(0, viewportHeight));
+        callbackDict.putDouble("latNE", ne.getLatitude());
+        callbackDict.putDouble("lngNE", ne.getLongitude());
+        callbackDict.putDouble("latSW", sw.getLatitude());
+        callbackDict.putDouble("lngSW", sw.getLongitude());
+      }
+      return callbackDict;
     }
 
     public MapView getMapView() {
