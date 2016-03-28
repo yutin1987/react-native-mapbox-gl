@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.lang.Object;
+import java.lang.Runtime;
 import android.graphics.drawable.BitmapDrawable;
 
 import android.graphics.drawable.BitmapDrawable;
@@ -81,7 +82,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     protected MapView mapView;
     private WritableMap properties;
     private LifecycleEventListener lifecycleEventListener;
-    private LruCache bitmapCache;
+    private LruCache<String, Icon> iconCache;
 
     @Override
     public String getName() {
@@ -93,7 +94,9 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         mapView = new MapView(context, "pk.foo");
         mapView.onCreate(null);
         properties = Arguments.createMap();
-        bitmapCache = new LruCache(4 * 1024 * 1024);
+        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        final int cacheSize = maxMemory / 8;
+        iconCache = new LruCache<String, Icon>(cacheSize);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -114,21 +117,14 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         mapView.setTilt(pitch, 1L);
     }
 
-    public Drawable drawableFromUrl(MapView view, String url) throws IOException {
-        if (bitmapCache.get(url) != null) {
-            Bitmap x = (Bitmap) bitmapCache.get(url);
-            BitmapDrawable bitmapDrawable = new BitmapDrawable(view.getResources(), x);
-            return bitmapDrawable;
-        }
-
+    public BitmapDrawable drawableFromUrl(MapView view, String url) throws IOException {
         Bitmap x;
-
+    
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         connection.connect();
         InputStream input = connection.getInputStream();
 
         x = BitmapFactory.decodeStream(input);
-        bitmapCache.put(url, x);
         BitmapDrawable bitmapDrawable = new BitmapDrawable(view.getResources(), x);
 
         return bitmapDrawable;
@@ -453,6 +449,29 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         return mapView;
     }
 
+    public Icon iconFromUrl(MapView view, String url) {
+        Icon icon;
+        
+        try {
+            synchronized (iconCache) {
+                icon = (Icon) iconCache.get(url);
+
+                if (icon == null) {
+                    Drawable image = drawableFromUrl(view, url);
+                    IconFactory iconFactory = view.getIconFactory();
+                    icon = iconFactory.fromDrawable(image);
+                    iconCache.put(url, icon);
+                }
+            }
+        } catch (Exception e) {
+            IconFactory iconFactory = view.getIconFactory();
+            icon = iconFactory.defaultMarker();
+            e.printStackTrace();
+        }
+
+        return icon;
+    }
+
     private MarkerOptions convertToMarker(MapView view, @Nullable ReadableMap annotation) {
         double latitude = annotation.getArray("coordinates").getDouble(0);
         double longitude = annotation.getArray("coordinates").getDouble(1);
@@ -471,9 +490,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
             ReadableMap annotationImage = annotation.getMap("annotationImage");
             String annotationURL = annotationImage.getString("url");
             try {
-                Drawable image = drawableFromUrl(mapView, annotationURL);
-                IconFactory iconFactory = view.getIconFactory();
-                Icon icon = iconFactory.fromDrawable(image);
+                Icon icon = iconFromUrl(mapView, annotationURL);
                 marker.icon(icon);
             } catch (Exception e) {
                 e.printStackTrace();
