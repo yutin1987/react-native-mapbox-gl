@@ -49,6 +49,7 @@ import android.graphics.drawable.BitmapDrawable;
 
 import android.graphics.drawable.BitmapDrawable;
 import javax.annotation.Nullable;
+import android.graphics.PointF;
 
 public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
@@ -554,10 +555,10 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         MarkerOptions options = convertToMarker(view, annotation);
                         pointsList.add(options);
                     } else if (type.equals("polyline")) {
-                        PolylineOptions options = convertToPolyline(annotation);
+                        PolylineOptions options = convertToPolyline(view, annotation);
                         pointsList.add(options);
                     } else if (type.equals("polygon")) {
-                        PolygonOptions options = convertToPolygon(annotation);
+                        PolygonOptions options = convertToPolygon(view, annotation);
                         pointsList.add(options);
                     }
                 }
