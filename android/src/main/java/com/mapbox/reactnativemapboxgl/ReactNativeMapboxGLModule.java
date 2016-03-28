@@ -88,8 +88,8 @@ public class ReactNativeMapboxGLModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void addAnnotations(int mapRef, ReadableArray value) {
-        aPackage.getManager().setAnnotations(aPackage.getManager().getMapView(), value, false);
+    public void addAnnotations(int mapRef, ReadableArray value, boolean clearMap) {
+        aPackage.getManager().setAnnotations(aPackage.getManager().getMapView(), value, clearMap);
     }
 
     @ReactMethod

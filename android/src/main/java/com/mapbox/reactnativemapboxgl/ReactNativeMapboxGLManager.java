@@ -4,7 +4,9 @@ package com.mapbox.reactnativemapboxgl;
 import android.graphics.Color;
 import android.util.Log;
 import android.os.StrictMode;
+import android.os.AsyncTask;
 import android.location.Location;
+import android.util.LruCache;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -40,11 +42,13 @@ import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.lang.Object;
 import android.graphics.drawable.BitmapDrawable;
 
 import android.graphics.drawable.BitmapDrawable;
 import javax.annotation.Nullable;
-import android.graphics.PointF;
 
 public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
 
@@ -73,9 +77,10 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     public static final String PROP_ATTRIBUTION_BUTTON_IS_HIDDEN = "attributionButtonIsHidden";
 
     private HashMap<String, Annotation> annotationConnection = new HashMap<String, Annotation>();
-    private MapView mapView;
+    protected MapView mapView;
     private WritableMap properties;
     private LifecycleEventListener lifecycleEventListener;
+    private LruCache bitmapCache;
 
     @Override
     public String getName() {
@@ -87,6 +92,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         mapView = new MapView(context, "pk.foo");
         mapView.onCreate(null);
         properties = Arguments.createMap();
+        bitmapCache = new LruCache(4 * 1024 * 1024);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -107,7 +113,13 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         mapView.setTilt(pitch, 1L);
     }
 
-    public static Drawable drawableFromUrl(MapView view, String url) throws IOException {
+    public Drawable drawableFromUrl(MapView view, String url) throws IOException {
+        if (bitmapCache.get(url) != null) {
+            Bitmap x = (Bitmap) bitmapCache.get(url);
+            BitmapDrawable bitmapDrawable = new BitmapDrawable(view.getResources(), x);
+            return bitmapDrawable;
+        }
+
         Bitmap x;
 
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
@@ -115,7 +127,10 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         InputStream input = connection.getInputStream();
 
         x = BitmapFactory.decodeStream(input);
-        return new BitmapDrawable(view.getResources(), x);
+        bitmapCache.put(url, x);
+        BitmapDrawable bitmapDrawable = new BitmapDrawable(view.getResources(), x);
+
+        return bitmapDrawable;
     }
 
     public void addAnnotation(MapView view, @Nullable ReadableMap annotation) {
@@ -149,14 +164,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         if (value == null || value.size() < 1) {
             Log.e(REACT_CLASS, "Error: No annotations");
         } else {
-            if (clearMap) {
-                view.removeAllAnnotations();
-            }
-            int size = value.size();
-            for (int i = 0; i < size; i++) {
-                ReadableMap annotation = value.getMap(i);
-                addAnnotation(view, annotation);
-            }
+            AsyncTask buildAnnotationList = new BuildAnnotationList(this, clearMap);
+            buildAnnotationList.execute(value);
         }
     }
 
@@ -517,5 +526,59 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
             polygon.strokeColor(strokeColor);
         }
         return polygon;
+    }
+
+   private class BuildAnnotationList extends AsyncTask<Object, Void, List> {
+       private MapView view;
+       private boolean clearMap;
+       private ReactNativeMapboxGLManager mapManager;
+
+       public BuildAnnotationList(ReactNativeMapboxGLManager manager, boolean clear) {
+           this.view = manager.getMapView();
+           this.clearMap = clear;
+       }
+
+        @Override
+        protected List doInBackground(Object... values) {
+            List pointsList = new ArrayList();
+
+            try {
+                ReadableArray annotations = (ReadableArray) values[0];
+                int size = annotations.size();
+
+                for (int i = 0; i < size; i++) {
+                    ReadableMap annotation = annotations.getMap(i);
+                    String type = annotation.getString("type");
+
+                    if (type.equals("point")) {
+                        MarkerOptions options = convertToMarker(view, annotation);
+                        pointsList.add(options);
+                    } else if (type.equals("polyline")) {
+                        PolylineOptions options = convertToPolyline(annotation);
+                        pointsList.add(options);
+                    } else if (type.equals("polygon")) {
+                        PolygonOptions options = convertToPolygon(annotation);
+                        pointsList.add(options);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return pointsList;
+        }
+
+        @Override
+        protected void onPostExecute(List result) {
+            try {
+                if (clearMap) {
+                    view.removeAllAnnotations();
+                }
+
+                view.addMarkers(result);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
