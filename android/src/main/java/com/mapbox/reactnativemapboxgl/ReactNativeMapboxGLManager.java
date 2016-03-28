@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.os.StrictMode;
 import android.location.Location;
+import android.util.Base64;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -126,6 +127,13 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         return new BitmapDrawable(view.getResources(), x);
     }
 
+    public static Drawable drawableFromBase64(MapView view, String base64) {
+        Bitmap x;
+        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+        x = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        return new BitmapDrawable(view.getResources(), x);
+    }
+
     @ReactProp(name = PROP_ANNOTATIONS)
     public void setAnnotationClear(MapView view, @Nullable ReadableArray value) {
         setAnnotations(view, value, true);
@@ -163,6 +171,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                             Drawable image;
                             if (annotationURL.startsWith("image!")) {
                                 image = drawableFromDrawableName(mapView, annotationURL.replace("image!", ""));
+                            } else if (annotationURL.startsWith("data:image/png;base64,")) {
+                                image = drawableFromBase64(mapView, annotationURL.replace("data:image/png;base64,", ""));
                             } else {
                                 image = drawableFromUrl(mapView, annotationURL);
                             }
