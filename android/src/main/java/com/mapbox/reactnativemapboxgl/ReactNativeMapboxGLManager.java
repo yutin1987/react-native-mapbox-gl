@@ -83,6 +83,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     private WritableMap properties;
     private LifecycleEventListener lifecycleEventListener;
     private LruCache<String, Icon> iconCache;
+    private static String APPLICATION_ID;
 
     @Override
     public String getName() {
@@ -98,6 +99,7 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         final int cacheSize = maxMemory / 8;
         iconCache = new LruCache<String, Icon>(cacheSize);
 
+        APPLICATION_ID = context.getPackageName();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         return mapView;
@@ -150,6 +152,13 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                 annotationConnection.put(annotation.getString("id"), polygon.getPolygon());
                 break;
         }
+    }
+
+    public static Drawable drawableFromDrawableName(MapView view, String drawableName) {
+        Bitmap x;
+        int resID = view.getResources().getIdentifier(drawableName, "drawable", APPLICATION_ID);
+        x = BitmapFactory.decodeResource(view.getResources(), resID);
+        return new BitmapDrawable(view.getResources(), x);
     }
 
     @ReactProp(name = PROP_ANNOTATIONS)
@@ -457,7 +466,12 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                 icon = (Icon) iconCache.get(url);
 
                 if (icon == null) {
-                    Drawable image = drawableFromUrl(view, url);
+                    Drawable image;
+                    if (url.startsWith("image!")) {
+                        image = drawableFromDrawableName(mapView, url.replace("image!", ""));
+                    } else {
+                        image = drawableFromUrl(view, url);
+                    }
                     IconFactory iconFactory = view.getIconFactory();
                     icon = iconFactory.fromDrawable(image);
                     iconCache.put(url, icon);
