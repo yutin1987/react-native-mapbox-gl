@@ -20,10 +20,10 @@ var MapMixins = {
     MapboxGLManager.setCenterCoordinateZoomLevelAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude, zoomLevel);
   },
   addAnnotations(mapRef, annotations, clearMap = false) {
-    MapboxGLManager.addAnnotations(React.findNodeHandle(this.refs[mapRef]), annotations, clearMap);
+    MapboxGLManager.addAnnotations(findNodeHandle(this.refs[mapRef]), annotations, clearMap);
   },
   updateAnnotation(mapRef, annotation) {
-    MapboxGLManager.updateAnnotation(React.findNodeHandle(this.refs[mapRef]), annotation);
+    MapboxGLManager.updateAnnotation(findNodeHandle(this.refs[mapRef]), annotation);
   },
   selectAnnotationAnimated(mapRef, selectedIdentifier) {
     MapboxGLManager.selectAnnotationAnimated(findNodeHandle(this.refs[mapRef]), selectedIdentifier);
