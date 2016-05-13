@@ -3,7 +3,7 @@
 var React = require('react');
 var { PropTypes } = React;
 var ReactNative = require('react-native');
-var { NativeModules, requireNativeComponent, findNodeHandle } = ReactNative;
+var { NativeModules, requireNativeComponent, findNodeHandle, DeviceEventEmitter } = ReactNative;
 var { MapboxGLManager } = NativeModules;
 
 var MapMixins = {
@@ -114,6 +114,12 @@ var ReactMapViewWrapper = React.createClass({
     onLongPress: PropTypes.func,
     onUserLocationChange: PropTypes.func,
     disableBackgroundUserLocation: React.PropTypes.bool
+  },
+  componentWillMount() {
+    DeviceEventEmitter.addListener('onRegionChange', this.handleOnChange);
+    DeviceEventEmitter.addListener('onUserLocationChange', this.handleUserLocation);
+    DeviceEventEmitter.addListener('onOpenAnnotation', this.handleOnOpenAnnotation);
+    DeviceEventEmitter.addListener('onLongPress', this.handleOnLongPress);
   },
   handleOnChange(event) {
     if (this.props.onRegionChange) this.props.onRegionChange(event);
