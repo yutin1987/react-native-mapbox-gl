@@ -1,6 +1,8 @@
 
 package com.mapbox.reactnativemapboxgl;
 
+import java.util.Map;
+
 import android.graphics.Color;
 import android.util.Log;
 import android.os.StrictMode;
@@ -13,6 +15,8 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.common.MapBuilder;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -88,6 +92,20 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     @Override
     public String getName() {
         return REACT_CLASS;
+    }
+
+    @Override
+    public @Nullable Map getExportedCustomDirectEventTypeConstants() {
+        return MapBuilder.of(
+                PROP_ONREGIONCHANGE,
+                MapBuilder.of("registrationName", PROP_ONREGIONCHANGE)
+                PROP_ONUSER_LOCATION_CHANGE,
+                MapBuilder.of("registrationName", PROP_ONUSER_LOCATION_CHANGE)
+                PROP_ONLONGPRESS,
+                MapBuilder.of("registrationName", PROP_ONLONGPRESS)
+                PROP_ONOPENANNOTATION
+                MapBuilder.of("registrationName", PROP_ONOPENANNOTATION)
+        );
     }
 
     @Override
@@ -199,8 +217,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                     event.putMap("src", location);
                     ReactContext reactContext = (ReactContext) view.getContext();
                     reactContext
-                            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                            .emit("onRegionChange", event);
+                            .getJSModule(RCTEventEmitter.class)
+                            .receiveEvent(view.getId(), PROP_ONREGIONCHANGE, event);
                 }
             }
         });
@@ -223,8 +241,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                 event.putMap("src", locationMap);
                 ReactContext reactContext = (ReactContext) view.getContext();
                 reactContext
-                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                        .emit("onUserLocationChange", event);
+                        .getJSModule(RCTEventEmitter.class)
+                        .receiveEvent(view.getId(), PROP_ONUSER_LOCATION_CHANGE, event);
             }
         });
     }
@@ -243,8 +261,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                 event.putMap("src", markerObject);
                 ReactContext reactContext = (ReactContext) view.getContext();
                 reactContext
-                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                        .emit("onOpenAnnotation", event);
+                        .getJSModule(RCTEventEmitter.class)
+                        .receiveEvent(view.getId(), PROP_ONOPENANNOTATION, event);
 
                 // Returning true here hides the default popup, false shows it
                 return (marker == null || marker.getTitle() == null || marker.getTitle().length() == 0);
@@ -264,8 +282,8 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                 event.putMap("src", loc);
                 ReactContext reactContext = (ReactContext) view.getContext();
                 reactContext
-                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                        .emit("onLongPress", event);
+                        .getJSModule(RCTEventEmitter.class)
+                        .receiveEvent(view.getId(), PROP_ONLONGPRESS, event);
             }
         });
     }
