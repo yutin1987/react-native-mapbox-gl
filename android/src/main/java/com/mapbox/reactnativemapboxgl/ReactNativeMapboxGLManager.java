@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.os.StrictMode;
 import android.location.Location;
+import android.util.Base64;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -108,6 +109,15 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
         mapView.setTilt(pitch, 1L);
     }
 
+    public static Drawable drawableFromBase64(MapView view, String base64) {
+        Bitmap x;
+
+        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+        x = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+        return new BitmapDrawable(view.getResources(), x);
+    }
+
     public static Drawable drawableFromUrl(MapView view, String url) throws IOException {
         Bitmap x;
 
@@ -162,25 +172,22 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         try {
                             Drawable image;
                             if (annotationURL.startsWith("image!")) {
-                                Log.v("Mapbox", "is image");
                                 image = drawableFromDrawableName(mapView, annotationURL.replace("image!", ""));
+                            } else if (annotationURL.startsWith("data:image/png;base64,")) {
+                                image = drawableFromBase64(mapView, annotationURL.replace("data:image/png;base64,", ""));
                             } else {
-                                Log.v("Mapbox", "not image");
                                 image = drawableFromUrl(mapView, annotationURL);
                             }
                             IconFactory iconFactory = view.getIconFactory();
                             Icon icon;
                             if (annotationImage.hasKey("height") && annotationImage.hasKey("width")) {
-                                Log.v("Mapbox", "height width");
                                 float scale = view.getResources().getDisplayMetrics().density;
                                 int height = Math.round((float)annotationImage.getInt("height") * scale);
                                 int width = Math.round((float)annotationImage.getInt("width") * scale);
                                 icon = iconFactory.fromDrawable(image, width, height);
                             } else {
-                                Log.v("Mapbox", "free");
                                 icon = iconFactory.fromDrawable(image);
                             }
-                            Log.v("Mapbox", "icon");
                             marker.icon(icon);
                         } catch (Exception e) {
                             e.printStackTrace();
