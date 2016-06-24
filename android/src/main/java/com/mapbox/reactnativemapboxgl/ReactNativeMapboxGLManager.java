@@ -77,14 +77,10 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
     @Override
     public @Nullable Map getExportedCustomDirectEventTypeConstants() {
         return MapBuilder.of(
-                PROP_ONREGIONCHANGE,
-                MapBuilder.of("registrationName", PROP_ONREGIONCHANGE)
-                PROP_ONUSER_LOCATION_CHANGE,
-                MapBuilder.of("registrationName", PROP_ONUSER_LOCATION_CHANGE)
-                PROP_ONLONGPRESS,
-                MapBuilder.of("registrationName", PROP_ONLONGPRESS)
-                PROP_ONOPENANNOTATION
-                MapBuilder.of("registrationName", PROP_ONOPENANNOTATION)
+            PROP_ONREGIONCHANGE, MapBuilder.of("registrationName", PROP_ONREGIONCHANGE),
+            PROP_ONUSER_LOCATION_CHANGE, MapBuilder.of("registrationName", PROP_ONUSER_LOCATION_CHANGE),
+            PROP_ONLONGPRESS, MapBuilder.of("registrationName", PROP_ONLONGPRESS),
+            PROP_ONOPENANNOTATION, MapBuilder.of("registrationName", PROP_ONOPENANNOTATION)
         );
     }
 
@@ -166,20 +162,25 @@ public class ReactNativeMapboxGLManager extends SimpleViewManager<MapView> {
                         try {
                             Drawable image;
                             if (annotationURL.startsWith("image!")) {
+                                Log.v("Mapbox", "is image");
                                 image = drawableFromDrawableName(mapView, annotationURL.replace("image!", ""));
                             } else {
+                                Log.v("Mapbox", "not image");
                                 image = drawableFromUrl(mapView, annotationURL);
                             }
                             IconFactory iconFactory = view.getIconFactory();
                             Icon icon;
                             if (annotationImage.hasKey("height") && annotationImage.hasKey("width")) {
+                                Log.v("Mapbox", "height width");
                                 float scale = view.getResources().getDisplayMetrics().density;
                                 int height = Math.round((float)annotationImage.getInt("height") * scale);
                                 int width = Math.round((float)annotationImage.getInt("width") * scale);
                                 icon = iconFactory.fromDrawable(image, width, height);
                             } else {
+                                Log.v("Mapbox", "free");
                                 icon = iconFactory.fromDrawable(image);
                             }
+                            Log.v("Mapbox", "icon");
                             marker.icon(icon);
                         } catch (Exception e) {
                             e.printStackTrace();
