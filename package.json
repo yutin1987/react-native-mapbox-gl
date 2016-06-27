@@ -27,12 +27,13 @@
     "lint": "eslint --no-eslintrc -c .eslintrc index.ios.js index.android.js ios/example.js android/example.js"
   },
   "devDependencies": {
-    "babel-eslint": "^4.1.6",
-    "eslint": "^1.10.3",
-    "eslint-config-strict-react": "^4.0.0",
-    "eslint-plugin-react": "^3.11.3"
+    "eslint": "^2.12.0",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.8.1",
+    "eslint-plugin-jsx-a11y": "^1.4.2",
+    "eslint-plugin-react": "^5.1.1",
+    "eslint-plugin-react-native": "^1.1.0-beta"
   },
   "dependencies": {
-    "babel-eslint": "^4.1.6"
   }
 }
