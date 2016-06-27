@@ -19,46 +19,48 @@ const { mapStyles, userTrackingMode, userLocationVerticalAlignment, unknownResou
 
 let _metricsEnabled = MapboxGLManager.metricsEnabled;
 
-function setMetricsEnabled(enabled: boolean) {
+export { mapStyles, userTrackingMode, userLocationVerticalAlignment, unknownResourceCount };
+
+export function setMetricsEnabled(enabled: boolean) {
   _metricsEnabled = enabled;
   MapboxGLManager.setMetricsEnabled(enabled);
 }
 
-function getMetricsEnabled() {
+export function getMetricsEnabled() {
   return _metricsEnabled;
 }
 
 // Access token
-function setAccessToken(token: string) {
+export function setAccessToken(token: string) {
   MapboxGLManager.setAccessToken(token);
 }
 
 // Offline
-function addOfflinePack(options, callback = () => {}) {
+export function addOfflinePack(options, callback = () => {}) {
   MapboxGLManager.addPackForRegion(options, callback);
 }
 
-function getOfflinePacks(callback) {
+export function getOfflinePacks(callback) {
   MapboxGLManager.getPacks(callback);
 }
 
-function removeOfflinePack(packName, callback = () => {}) {
+export function removeOfflinePack(packName, callback = () => {}) {
   MapboxGLManager.removePack(packName, callback);
 }
 
-function addOfflinePackProgressListener(handler) {
+export function addOfflinePackProgressListener(handler) {
   return NativeAppEventEmitter.addListener('MapboxOfflineProgressDidChange', handler);
 }
 
-function addOfflineMaxAllowedTilesListener(handler) {
+export function addOfflineMaxAllowedTilesListener(handler) {
   return NativeAppEventEmitter.addListener('MapboxOfflineMaxAllowedTiles', handler);
 }
 
-function addOfflineErrorListener(handler) {
+export function addOfflineErrorListener(handler) {
   return NativeAppEventEmitter.addListener('MapboxOfflineError', handler);
 }
 
-class MapView extends Component {
+export default class MapView extends Component {
 
   // Viewport setters
   setDirection(direction, animated = true, callback) {
@@ -310,16 +312,3 @@ class MapView extends Component {
 }
 
 const MapboxGLView = requireNativeComponent('RCTMapboxGL', MapView);
-
-const Mapbox = {
-  MapView,
-  mapStyles, userTrackingMode, userLocationVerticalAlignment, unknownResourceCount,
-  getMetricsEnabled, setMetricsEnabled,
-  setAccessToken,
-  addOfflinePack, getOfflinePacks, removeOfflinePack,
-  addOfflinePackProgressListener,
-  addOfflineMaxAllowedTilesListener,
-  addOfflineErrorListener
-};
-
-module.exports = Mapbox;
