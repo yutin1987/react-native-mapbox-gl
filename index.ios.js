@@ -1,118 +1,56 @@
-'use strict';
+/* eslint import/no-unresolved: [2, { ignore: ['react', 'react-native'] }] */
 
-var React = require('react');
-var { PropTypes } = React;
+import React, { PropTypes } from 'react';
 
-var ReactNative = require('react-native');
-var { NativeModules, requireNativeComponent, findNodeHandle } = ReactNative;
+import {
+  NativeModules,
+  NativeAppEventEmitter,
+  requireNativeComponent,
+  findNodeHandle,
+} from 'react-native';
 
-var { MapboxGLManager } = NativeModules;
+const { MapboxGLManager } = NativeModules;
+const {
+  mapStyles,
+  userTrackingMode,
+  userLocationVerticalAlignment,
+  unknownResourceCount,
+} = MapboxGLManager;
 
-var MapMixins = {
-  addPackForRegion(mapRef, options) {
-    MapboxGLManager.addPackForRegion(findNodeHandle(this.refs[mapRef]), options);
-  },
-  getPacks(mapRef, callback) {
-    MapboxGLManager.getPacks(findNodeHandle(this.refs[mapRef]), callback);
-  },
-  removePack(mapRef, packName, callback) {
-    MapboxGLManager.removePack(findNodeHandle(this.refs[mapRef]), packName, callback);
-  },
-  setDirectionAnimated(mapRef, heading) {
-    MapboxGLManager.setDirectionAnimated(findNodeHandle(this.refs[mapRef]), heading);
-  },
-  setZoomLevelAnimated(mapRef, zoomLevel) {
-    MapboxGLManager.setZoomLevelAnimated(findNodeHandle(this.refs[mapRef]), zoomLevel);
-  },
-  setCenterCoordinateAnimated(mapRef, latitude, longitude) {
-    return MapboxGLManager.setCenterCoordinateAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude);
-  },
-  setCenterCoordinateZoomLevelAnimated(mapRef, latitude, longitude, zoomLevel) {
-    MapboxGLManager.setCenterCoordinateZoomLevelAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude, zoomLevel);
-  },
-  setCameraAnimated(mapRef, latitude, longitude, fromDistance, pitch, heading, duration) {
-    MapboxGLManager.setCameraAnimated(findNodeHandle(this.refs[mapRef]), latitude, longitude, fromDistance, pitch, heading, duration);
-  },
-  addAnnotations(mapRef, annotations) {
-    MapboxGLManager.addAnnotations(findNodeHandle(this.refs[mapRef]), annotations);
-  },
-  updateAnnotation(mapRef, annotation) {
-    MapboxGLManager.updateAnnotation(findNodeHandle(this.refs[mapRef]), annotation);
-  },
-  selectAnnotationAnimated(mapRef, selectedIdentifier) {
-    MapboxGLManager.selectAnnotationAnimated(findNodeHandle(this.refs[mapRef]), selectedIdentifier);
-  },
-  removeAnnotation(mapRef, selectedIdentifier) {
-    MapboxGLManager.removeAnnotation(findNodeHandle(this.refs[mapRef]), selectedIdentifier);
-  },
-  removeAllAnnotations(mapRef) {
-    MapboxGLManager.removeAllAnnotations(findNodeHandle(this.refs[mapRef]));
-  },
-  setVisibleCoordinateBoundsAnimated(mapRef, latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop, paddingRight, paddingBottom, paddingLeft) {
-    MapboxGLManager.setVisibleCoordinateBoundsAnimated(findNodeHandle(this.refs[mapRef]), latitudeSW, longitudeSW, latitudeNE, longitudeNE, paddingTop, paddingRight, paddingBottom, paddingLeft);
-  },
-  setUserTrackingMode(mapRef, userTrackingMode) {
-    MapboxGLManager.setUserTrackingMode(findNodeHandle(this.refs[mapRef]), userTrackingMode);
-  },
-  getCenterCoordinateZoomLevel(mapRef, callback) {
-    MapboxGLManager.getCenterCoordinateZoomLevel(findNodeHandle(this.refs[mapRef]), callback);
-  },
-  getDirection(mapRef, callback) {
-    MapboxGLManager.getDirection(findNodeHandle(this.refs[mapRef]), callback);
-  },
-  getBounds(mapRef, callback) {
-    MapboxGLManager.getBounds(findNodeHandle(this.refs[mapRef]), callback);
-  },
-  mapStyles: MapboxGLManager.mapStyles,
-  userTrackingMode: MapboxGLManager.userTrackingMode,
-  userLocationVerticalAlignment: MapboxGLManager.userLocationVerticalAlignment,
-  unknownResourceCount: MapboxGLManager.unknownResourceCount
-};
+export { mapStyles, userTrackingMode, userLocationVerticalAlignment, unknownResourceCount };
 
-var MapView = React.createClass({
-  statics: {
-    Mixin: MapMixins
-  },
-  _onRegionChange(event: Event) {
-    if (this.props.onRegionChange) this.props.onRegionChange(event.nativeEvent.src);
-  },
-  _onRegionWillChange(event: Event) {
-    if (this.props.onRegionWillChange) this.props.onRegionWillChange(event.nativeEvent.src);
-  },
-  _onOpenAnnotation(event: Event) {
-    if (this.props.onOpenAnnotation) this.props.onOpenAnnotation(event.nativeEvent.src);
-  },
-  _onRightAnnotationTapped(event: Event) {
-    if (this.props.onRightAnnotationTapped) this.props.onRightAnnotationTapped(event.nativeEvent.src);
-  },
-  _onUpdateUserLocation(event: Event) {
-    if (this.props.onUpdateUserLocation) this.props.onUpdateUserLocation(event.nativeEvent.src);
-  },
-  _onLongPress(event: Event) {
-    if (this.props.onLongPress) this.props.onLongPress(event.nativeEvent.src);
-  },
-  _onTap(event: Event) {
-    if (this.props.onTap) this.props.onTap(event.nativeEvent.src);
-  },
-  _onFinishLoadingMap(event: Event) {
-    if (this.props.onFinishLoadingMap) this.props.onFinishLoadingMap(event.nativeEvent.src);
-  },
-  _onStartLoadingMap(event: Event) {
-    if (this.props.onStartLoadingMap) this.props.onStartLoadingMap(event.nativeEvent.src);
-  },
-  _onLocateUserFailed(event: Event) {
-    if (this.props.onLocateUserFailed) this.props.onLocateUserFailed(event.nativeEvent.src);
-  },
-  _onOfflineProgressDidChange(event: Event) {
-    if (this.props.onOfflineProgressDidChange) this.props.onOfflineProgressDidChange(event.nativeEvent.src);
-  },
-  _onOfflineMaxAllowedMapboxTiles(event: Event) {
-    if (this.props.onOfflineMaxAllowedMapboxTiles) this.props.onOfflineMaxAllowedMapboxTiles(event.nativeEvent.src);
-  },
-  _onOfflineDidRecieveError(event: Event) {
-    if (this.props.onOfflineDidRecieveError) this.props.onOfflineDidRecieveError(event.nativeEvent.src);
-  },
-  propTypes: {
+export function setAccessToken(token: string) {
+  MapboxGLManager.setAccessToken(token);
+}
+
+// Offline
+export function addOfflinePack(options, callback = () => {}) {
+  MapboxGLManager.addPackForRegion(options, callback);
+}
+
+export function getOfflinePacks(callback) {
+  MapboxGLManager.getPacks(callback);
+}
+
+export function removeOfflinePack(packName, callback = () => {}) {
+  MapboxGLManager.removePack(packName, callback);
+}
+
+export function addOfflinePackProgressListener(handler) {
+  NativeAppEventEmitter.addListener('MapboxOfflineProgressDidChange', handler);
+}
+
+export function addOfflineMaxAllowedTilesListener(handler) {
+  NativeAppEventEmitter.addListener('MapboxOfflineMaxAllowedTiles', handler);
+}
+
+export function addOfflineErrorListener(handler) {
+  NativeAppEventEmitter.addListener('MapboxOfflineError', handler);
+}
+
+export default class MapView extends React.Component {
+
+  static propTypes = {
     showsUserLocation: PropTypes.bool,
     rotateEnabled: PropTypes.bool,
     scrollEnabled: PropTypes.bool,
@@ -127,7 +65,7 @@ var MapView = React.createClass({
     attributionButton: PropTypes.bool,
     centerCoordinate: PropTypes.shape({
       latitude: PropTypes.number.isRequired,
-      longitude: PropTypes.number.isRequired
+      longitude: PropTypes.number.isRequired,
     }),
     annotations: PropTypes.arrayOf(PropTypes.shape({
       coordinates: PropTypes.array.isRequired,
@@ -143,13 +81,13 @@ var MapView = React.createClass({
       rightCalloutAccessory: PropTypes.object({
         height: PropTypes.number,
         width: PropTypes.number,
-        url: PropTypes.string
+        url: PropTypes.string,
       }),
       annotationImage: PropTypes.object({
         height: PropTypes.number,
         width: PropTypes.number,
-        url: PropTypes.string
-      })
+        url: PropTypes.string,
+      }),
     })),
     attributionButtonIsHidden: PropTypes.bool,
     logoIsHidden: PropTypes.bool,
@@ -168,48 +106,175 @@ var MapView = React.createClass({
     userLocationVerticalAlignment: PropTypes.number,
     onOfflineProgressDidChange: PropTypes.func,
     onOfflineMaxAllowedMapboxTiles: PropTypes.func,
-    onOfflineDidRecieveError: PropTypes.func
-  },
-  getDefaultProps() {
-    return {
-      centerCoordinate: {
-        latitude: 0,
-        longitude: 0
-      },
-      debugActive: false,
-      direction: 0,
-      rotateEnabled: true,
-      scrollEnabled: true,
-      showsUserLocation: false,
-      styleURL: this.Mixin.mapStyles.streets,
-      zoomEnabled: true,
-      zoomLevel: 0,
-      attributionButtonIsHidden: false,
-      logoIsHidden: false,
-      compassIsHidden: false
-    };
-  },
+    onOfflineDidRecieveError: PropTypes.func,
+  }
+
+  static defaultProps = {
+    centerCoordinate: {
+      latitude: 0,
+      longitude: 0,
+    },
+    debugActive: false,
+    direction: 0,
+    rotateEnabled: true,
+    scrollEnabled: true,
+    showsUserLocation: false,
+    styleURL: mapStyles.streets,
+    userTrackingMode: userTrackingMode.none,
+    zoomEnabled: true,
+    zoomLevel: 0,
+    attributionButtonIsHidden: false,
+    logoIsHidden: false,
+    compassIsHidden: false,
+    onRegionChange: () => {},
+    onRegionWillChange: () => {},
+    onOpenAnnotation: () => {},
+    onRightAnnotationTapped: () => {},
+    onUpdateUserLocation: () => {},
+    onLongPress: () => {},
+    onTap: () => {},
+    onFinishLoadingMap: () => {},
+    onStartLoadingMap: () => {},
+    onLocateUserFailed: () => {},
+    onOfflineProgressDidChange: () => {},
+    onOfflineMaxAllowedMapboxTiles: () => {},
+    onOfflineDidRecieveError: () => {},
+  };
+
+  onRegionChange = (event: Event) => {
+    this.props.onRegionChange(event.nativeEvent.src);
+  };
+
+  onRegionWillChange = (event: Event) => {
+    this.props.onRegionWillChange(event.nativeEvent.src);
+  };
+
+  onOpenAnnotation = (event: Event) => {
+    this.props.onOpenAnnotation(event.nativeEvent.src);
+  };
+
+  onRightAnnotationTapped = (event: Event) => {
+    this.props.onRightAnnotationTapped(event.nativeEvent.src);
+  };
+
+  onUpdateUserLocation = (event: Event) => {
+    this.props.onUpdateUserLocation(event.nativeEvent.src);
+  };
+
+  onLongPress = (event: Event) => {
+    this.props.onLongPress(event.nativeEvent.src);
+  };
+
+  onTap = (event: Event) => {
+    this.props.onTap(event.nativeEvent.src);
+  };
+
+  onFinishLoadingMap = (event: Event) => {
+    this.props.onFinishLoadingMap(event.nativeEvent.src);
+  };
+
+  onStartLoadingMap = (event: Event) => {
+    this.props.onStartLoadingMap(event.nativeEvent.src);
+  };
+
+  onLocateUserFailed = (event: Event) => {
+    this.props.onLocateUserFailed(event.nativeEvent.src);
+  };
+
+  onOfflineProgressDidChange = (event: Event) => {
+    this.props.onOfflineProgressDidChange(event.nativeEvent.src);
+  };
+
+  onOfflineMaxAllowedMapboxTiles = (event: Event) => {
+    this.props.onOfflineMaxAllowedMapboxTiles(event.nativeEvent.src);
+  };
+
+  onOfflineDidRecieveError = (event: Event) => {
+    this.props.onOfflineDidRecieveError(event.nativeEvent.src);
+  };
+
+  onNativeComponentMount = (ref) => {
+    if (this.native === ref) { return; }
+    this.native = ref;
+  };
+
+  setNativeProps(nativeProps) {
+    if (this.native) this.native.setNativeProps(nativeProps);
+  }
+
+  setCamera(latitude, longitude, fromDistance, pitch, direction, duration = 1.0) {
+    MapboxGLManager.setCameraAnimated(
+      findNodeHandle(this),
+      latitude,
+      longitude,
+      fromDistance,
+      pitch,
+      direction,
+      duration
+    );
+  }
+
+  setVisibleCoordinateBounds(
+    latitudeSW,
+    longitudeSW,
+    latitudeNE,
+    longitudeNE,
+    paddingTop = 0,
+    paddingRight = 0,
+    paddingBottom = 0,
+    paddingLeft = 0
+  ) {
+    MapboxGLManager.setVisibleCoordinateBounds(
+      findNodeHandle(this),
+      latitudeSW,
+      longitudeSW,
+      latitudeNE,
+      longitudeNE,
+      paddingTop,
+      paddingRight,
+      paddingBottom,
+      paddingLeft
+    );
+  }
+
+  getCenterCoordinateZoomLevel(callback) {
+    MapboxGLManager.getCenterCoordinateZoomLevel(findNodeHandle(this), callback);
+  }
+
+  getDirection(callback) {
+    MapboxGLManager.getDirection(findNodeHandle(this), callback);
+  }
+  getBounds(callback) {
+    MapboxGLManager.getBounds(findNodeHandle(this), callback);
+  }
+
+  selectAnnotation(annotationId, animated = true) {
+    MapboxGLManager.selectAnnotationAnimated(findNodeHandle(this), annotationId, animated);
+  }
+
+  native = null;
+
   render() {
     return (
       <MapboxGLView
         {...this.props}
-        onRegionChange={this._onRegionChange}
-        onRegionWillChange={this._onRegionWillChange}
-        onOpenAnnotation={this._onOpenAnnotation}
-        onRightAnnotationTapped={this._onRightAnnotationTapped}
-        onUpdateUserLocation={this._onUpdateUserLocation}
-        onLongPress={this._onLongPress}
-        onTap={this._onTap}
-        onFinishLoadingMap={this._onFinishLoadingMap}
-        onStartLoadingMap={this._onStartLoadingMap}
-        onLocateUserFailed={this._onLocateUserFailed}
-        onOfflineProgressDidChange={this._onOfflineProgressDidChange}
-        onOfflineMaxAllowedMapboxTiles={this._onOfflineMaxAllowedMapboxTiles}
-        onOfflineDidRecieveError={this._onOfflineDidRecieveError} />
+        ref={this.onNativeComponentMount}
+        onRegionChange={this.onRegionChange}
+        onRegionWillChange={this.onRegionWillChange}
+        onOpenAnnotation={this.onOpenAnnotation}
+        onRightAnnotationTapped={this.onRightAnnotationTapped}
+        onUpdateUserLocation={this.onUpdateUserLocation}
+        onLongPress={this.onLongPress}
+        onTap={this.onTap}
+        onFinishLoadingMap={this.onFinishLoadingMap}
+        onStartLoadingMap={this.onStartLoadingMap}
+        onLocateUserFailed={this.onLocateUserFailed}
+        onOfflineProgressDidChange={this.onOfflineProgressDidChange}
+        onOfflineMaxAllowedMapboxTiles={this.onOfflineMaxAllowedMapboxTiles}
+        onOfflineDidRecieveError={this.onOfflineDidRecieveError}
+      />
     );
   }
-});
+}
 
-var MapboxGLView = requireNativeComponent('RCTMapboxGL', MapView);
-
-module.exports = MapView;
+const MapboxGLView = requireNativeComponent('RCTMapboxGL', MapView);
