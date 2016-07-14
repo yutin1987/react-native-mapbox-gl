@@ -34,6 +34,10 @@ export default class MapView extends React.Component {
       strokeColor: PropTypes.string,
       strokeWidth: PropTypes.number,
     })),
+    initialCenterCoordinate: PropTypes.shape({
+      latitude: PropTypes.number.isRequired,
+      longitude: PropTypes.number.isRequired,
+    }),
     centerCoordinate: PropTypes.shape({
       latitude: PropTypes.number.isRequired,
       longitude: PropTypes.number.isRequired,
@@ -58,7 +62,7 @@ export default class MapView extends React.Component {
   }
 
   static defaultProps = {
-    centerCoordinate: {
+    initialCenterCoordinate: {
       latitude: 0,
       longitude: 0,
     },
@@ -78,6 +82,11 @@ export default class MapView extends React.Component {
     onOpenAnnotation: () => {},
     onLongPress: () => {},
   };
+
+  componentWillMount() {
+    const { initialCenterCoordinate } = this.props;
+    this.centerCoordinate = initialCenterCoordinate;
+  }
 
   onRegionChange = (event: Event) => {
     this.props.onRegionChange(event.nativeEvent.src);
@@ -104,6 +113,14 @@ export default class MapView extends React.Component {
       pitch,
       direction,
       duration
+    );
+  }
+
+  setCenterCoordinate(latitude, longitude) {
+    MapboxGLManager.setCenterCoordinateAnimated(
+      findNodeHandle(this),
+      parseFloat(latitude),
+      parseFloat(longitude)
     );
   }
 
@@ -145,10 +162,16 @@ export default class MapView extends React.Component {
     MapboxGLManager.selectAnnotationAnimated(findNodeHandle(this), annotationId, animated);
   }
 
+  centerCoordinate = {
+    latitude: 0,
+    longitude: 0,
+  };
+
   render() {
     return (
       <MapboxGLView
         {...this.props}
+        centerCoordinate={this.centerCoordinate}
         onRegionChange={this.onRegionChange}
         onUserLocationChange={this.onUserLocationChange}
         onOpenAnnotation={this.onOpenAnnotation}

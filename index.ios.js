@@ -63,6 +63,10 @@ export default class MapView extends React.Component {
     debugActive: PropTypes.bool,
     userTrackingMode: PropTypes.number,
     attributionButton: PropTypes.bool,
+    initialCenterCoordinate: PropTypes.shape({
+      latitude: PropTypes.number.isRequired,
+      longitude: PropTypes.number.isRequired,
+    }),
     centerCoordinate: PropTypes.shape({
       latitude: PropTypes.number.isRequired,
       longitude: PropTypes.number.isRequired,
@@ -110,7 +114,7 @@ export default class MapView extends React.Component {
   }
 
   static defaultProps = {
-    centerCoordinate: {
+    initialCenterCoordinate: {
       latitude: 0,
       longitude: 0,
     },
@@ -140,6 +144,11 @@ export default class MapView extends React.Component {
     onOfflineMaxAllowedMapboxTiles: () => {},
     onOfflineDidRecieveError: () => {},
   };
+
+  componentWillMount() {
+    const { initialCenterCoordinate } = this.props;
+    this.centerCoordinate = initialCenterCoordinate;
+  }
 
   onRegionChange = (event: Event) => {
     this.props.onRegionChange(event.nativeEvent.src);
@@ -214,6 +223,14 @@ export default class MapView extends React.Component {
     );
   }
 
+  setCenterCoordinate(latitude, longitude) {
+    MapboxGLManager.setCenterCoordinateAnimated(
+      findNodeHandle(this),
+      parseFloat(latitude),
+      parseFloat(longitude)
+    );
+  }
+
   setVisibleCoordinateBounds(
     latitudeSW,
     longitudeSW,
@@ -252,6 +269,11 @@ export default class MapView extends React.Component {
     MapboxGLManager.selectAnnotationAnimated(findNodeHandle(this), annotationId, animated);
   }
 
+  centerCoordinate = {
+    latitude: 0,
+    longitude: 0,
+  };
+
   native = null;
 
   render() {
@@ -259,6 +281,7 @@ export default class MapView extends React.Component {
       <MapboxGLView
         {...this.props}
         ref={this.onNativeComponentMount}
+        centerCoordinate={this.centerCoordinate}
         onRegionChange={this.onRegionChange}
         onRegionWillChange={this.onRegionWillChange}
         onOpenAnnotation={this.onOpenAnnotation}
