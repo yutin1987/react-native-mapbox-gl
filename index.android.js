@@ -119,8 +119,8 @@ export default class MapView extends React.Component {
   setCenterCoordinate(latitude, longitude) {
     MapboxGLManager.setCenterCoordinateAnimated(
       findNodeHandle(this),
-      parseFloat(latitude),
-      parseFloat(longitude)
+      parseFloat(Math.round(latitude * 1000000) / 1000000),
+      parseFloat(Math.round(longitude * 1000000) / 1000000)
     );
   }
 
